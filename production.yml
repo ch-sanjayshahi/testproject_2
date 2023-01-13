@@ -1,0 +1,72 @@
+version: '3'
+
+volumes:
+  production_postgres_data: {}
+  production_postgres_data_backups: {}
+  static_data: {}
+  media_data: {}
+
+networks:
+  my_custom_network:
+    external: true
+
+services:
+  django:
+    build:
+      context: .
+      dockerfile: ./compose/production/django/Dockerfile
+    image: testproject_2_production_django
+    depends_on:
+      - postgres
+      - redis
+    env_file:
+      - ./.envs/.production/.django
+      - ./.envs/.production/.postgres
+    # ports:
+    #   - 8001:8000
+    command: /start
+    networks:
+      - my_custom_network
+
+  postgres:
+    build:
+      context: .
+      dockerfile: ./compose/production/postgres/Dockerfile
+    image: testproject_2_production_postgres
+    volumes:
+      - production_postgres_data:/var/lib/postgresql/data
+      - production_postgres_data_backups:/backups
+    env_file:
+      - ./.envs/.production/.postgres
+    networks:
+      - my_custom_network
+
+  # nginx:
+  #   build:
+  #     context: .
+  #     dockerfile: ./compose/production/nginx/Dockerfile
+  #   ports:
+  #     - "8001:80"
+  #   volumes:
+  #     - /home/codehimalaya/projects/testproject_2/static:/home/app/staticfiles
+  #     - /home/codehimalaya/projects/testproject_2/media:/home/app/media
+
+  #   depends_on:
+  #     - django
+  # traefik:
+  #   build:
+  #     context: .
+  #     dockerfile: ./compose/production/traefik/Dockerfile
+  #   image: testproject_2_production_traefik
+  #   depends_on:
+  #     - django
+  #   volumes:
+  #     - production_traefik:/etc/traefik/acme
+  #   ports:
+  #     - "0.0.0.0:80:80"
+  #     - "0.0.0.0:443:443"
+
+  redis:
+    image: redis:6
+    networks:
+      - my_custom_network
