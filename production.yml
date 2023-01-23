@@ -11,7 +11,7 @@ networks:
     external: true
 
 services:
-  django:
+  test2_django:
     build:
       context: .
       dockerfile: ./compose/production/django/Dockerfile
@@ -23,7 +23,7 @@ services:
       - ./.envs/.production/.django
       - ./.envs/.production/.postgres
     # ports:
-    #   - 8001:8000
+    #   - 8001:8001
     command: /start
     networks:
       - my_custom_network
